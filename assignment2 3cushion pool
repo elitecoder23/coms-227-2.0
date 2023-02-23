@@ -1,0 +1,356 @@
+package hw2;
+
+import api.PlayerPosition;
+import api.BallType;
+import static api.PlayerPosition.*;
+import static api.BallType.*;
+
+/**
+ * Class that models the game of three-cushion billiards.
+ * 
+ * @author YOUR_NAME_GOES_HERE!!!
+ */
+public class ThreeCushion {
+
+	// TODO: EVERTHING ELSE GOES HERE
+	// Note that this code will not compile until you have put in stubs for all
+	// the required methods.
+
+	// The method below is provided for you and you should not modify it.
+	// The compile errors will go away after you have written stubs for the
+	// rest of the API methods.
+
+	/**
+	 * Returns a one-line string representation of the current game state. The
+	 * format is:
+	 * <p>
+	 * <tt>Player A*: X Player B: Y, Inning: Z</tt>
+	 * <p>
+	 * The asterisks next to the player's name indicates which player is at the
+	 * table this inning. The number after the player's name is their score. Z is
+	 * the inning number. Other messages will appear at the end of the string.
+	 * 
+	 * @return one-line string representation of the game state
+	 */
+	
+	public String toString() {
+		String fmt = "Player A%s: %d, Player B%s: %d, Inning: %d %s%s";
+		String playerATurn = "";
+		String playerBTurn = "";
+		String inningStatus = "";
+		String gameStatus = "";
+		if (getInningPlayer() == PLAYER_A) {
+			playerATurn = "*";
+		} else if (getInningPlayer() == PLAYER_B) {
+			playerBTurn = "*";
+		}
+		if (isInningStarted()) {
+			inningStatus = "started";
+		} else {
+			inningStatus = "not started";
+		}
+		if (isGameOver()) {
+			gameStatus = ", game result final";
+		}
+		return String.format(fmt, playerATurn, getPlayerAScore(), playerBTurn, getPlayerBScore(), getInning(),
+				inningStatus, gameStatus);
+	}
+	
+	
+	
+	private int firstInning;
+	private int pointsWinGame;
+	private PlayerPosition currentPlayer;
+	private boolean isShotStart;
+	private boolean IsInningStart;
+	private boolean lastShot;
+	private boolean shotBreak;
+	private BallType ballColor;
+	private PlayerPosition winnerOfLag;
+	private boolean isOtherBallHit;
+	private boolean isRedHit;
+	private int cushionHits;
+	private  int playerAScore;
+	private int playerBScore;
+	private boolean typeBankShot;
+	private boolean isPossiblyBankShot;
+	private boolean gameIsOver;
+	
+
+public ThreeCushion(PlayerPosition lagWinner, int pointsToWin)
+{
+	firstInning = 1;
+	pointsWinGame = pointsToWin;
+	winnerOfLag = lagWinner;
+	
+	
+	
+	
+	
+	
+	
+	 
+	//lagWinner = either Player A or B
+	//pointsToWin - the number of points a player needs to reach for the game to end
+	//based on simple tests, the lagwinner is player A and the points needed to win are 3
+	
+	
+}
+
+public void lagWinnerChooses​(boolean selfBreak, BallType cueBall)
+{
+	shotBreak = true;
+	
+	//
+	
+	if(winnerOfLag == PLAYER_A && selfBreak == true)
+	{
+		currentPlayer = PLAYER_A;
+	}
+	else if(winnerOfLag == PLAYER_A && selfBreak == false)
+	{
+		currentPlayer = PLAYER_B;
+	}
+	
+	if(winnerOfLag == PLAYER_B && selfBreak == true)
+	{
+		currentPlayer = PLAYER_B;
+	}
+	else if(winnerOfLag == PLAYER_B && selfBreak == false)
+	{
+		currentPlayer = PLAYER_A;
+	}
+	
+	//
+	
+	if(winnerOfLag == PLAYER_A)
+	{
+		ballColor = cueBall;
+		
+	}
+	else if(winnerOfLag == PLAYER_B)
+	{
+		ballColor = cueBall;
+	}
+	
+	//
+	
+	if(selfBreak == false && ballColor == WHITE)
+	{
+		ballColor = YELLOW;
+	}
+	else if(selfBreak == false && ballColor == YELLOW)
+	{
+		ballColor = WHITE;
+	}	
+}
+
+public void cueStickStrike​(BallType ball)
+{
+	IsInningStart = true;
+	isShotStart = true;
+	
+	if(ball != ballColor)
+	{
+		foul();
+	}
+		
+	cushionHits = 0;
+	isPossiblyBankShot = false;
+	typeBankShot = false;
+	isRedHit = false;
+	isOtherBallHit = false;
+}
+
+public void cueBallStrike​(BallType ball)
+{
+	if(isShotStart == false)
+	{
+		return;
+	
+	}
+	
+	if(isGameOver())
+	{
+		return;
+	}
+	
+	if(ball == RED)
+	{
+		isRedHit = true;
+	}
+	else
+	{
+		isOtherBallHit = true;
+	}
+	
+	
+		
+	
+	
+	
+
+}
+
+public void cueBallImpactCushion()
+{
+	cushionHits += 1;
+	
+	if(isRedHit == false && isOtherBallHit == false && cushionHits == 3)
+	{
+		isPossiblyBankShot = true;
+	}
+}
+
+public void endShot()
+{
+	if(IsInningStart == false)
+	{
+		return;
+	}
+	
+	
+	
+	if(isRedHit == true && isOtherBallHit == true && cushionHits >= 3 )
+	{
+		
+		if(isPossiblyBankShot == true)
+		{
+			typeBankShot = true;
+		}
+		else
+		{
+			typeBankShot = false;
+		}
+		
+		
+		if(currentPlayer == PLAYER_A)
+		{
+			this.playerAScore += 1;
+			
+			if(this.playerAScore == 3)
+			{
+				gameIsOver = true;
+			}
+		}
+		else
+		{
+			this.playerBScore += 1;
+			
+			if(this.playerBScore == 3)
+			{
+				gameIsOver = true;
+			}
+			
+		}
+		
+		return;
+		
+	}
+	
+	firstInning += 1;
+	isShotStart = false;
+	shotBreak = false;
+	IsInningStart = false;
+	
+	if(ballColor == WHITE)
+	{
+		ballColor = YELLOW;
+	}
+	else if(ballColor == YELLOW)
+	{
+		ballColor = WHITE;
+	}
+	
+	//
+	
+	if(currentPlayer == PLAYER_A)
+	{
+		currentPlayer = PLAYER_B;
+	}
+	else if(currentPlayer == PLAYER_B)
+	{
+		currentPlayer = PLAYER_A;
+	}
+	
+}
+
+public void foul()
+{
+	IsInningStart = false;
+	firstInning += 1;
+	
+	if(ballColor == WHITE)
+	{
+		ballColor = YELLOW;
+	}
+	else if(ballColor == YELLOW)
+	{
+		ballColor = WHITE;
+	}
+	
+	//
+	
+	if(currentPlayer == PLAYER_A)
+	{
+		currentPlayer = PLAYER_B;
+	}
+	else if(currentPlayer == PLAYER_B)
+	{
+		currentPlayer = PLAYER_A;
+	}
+	
+	
+}
+
+public int getPlayerAScore()
+{
+	return this.playerAScore;
+}
+
+public int getPlayerBScore()
+{
+	return this.playerBScore;
+}
+
+public int getInning()
+{
+	return firstInning;
+}
+
+public BallType getCueBall()
+{
+	return ballColor;
+}
+
+public PlayerPosition getInningPlayer()
+{
+	return currentPlayer;
+}
+
+public boolean isBreakShot()
+{
+	return shotBreak;
+}
+
+public boolean isBankShot()
+{
+	return typeBankShot;
+}
+
+public boolean isShotStarted()
+{
+	return isShotStart;
+}
+
+public boolean isInningStarted()
+{
+	return IsInningStart;
+}
+
+public boolean isGameOver()
+{
+	return gameIsOver;
+}
+
+}
