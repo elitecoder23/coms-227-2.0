@@ -8,8 +8,9 @@ import static api.BallType.*;
 /**
  * Class that models the game of three-cushion billiards.
  * 
- * @author YOUR_NAME_GOES_HERE!!!
+ * @author ANISH NAG
  */
+
 public class ThreeCushion {
 
 	// TODO: EVERTHING ELSE GOES HERE
@@ -32,6 +33,7 @@ public class ThreeCushion {
 	 * 
 	 * @return one-line string representation of the game state
 	 */
+	
 	
 	public String toString() {
 		String fmt = "Player A%s: %d, Player B%s: %d, Inning: %d %s%s";
@@ -75,8 +77,14 @@ public class ThreeCushion {
 	private boolean typeBankShot;
 	private boolean isPossiblyBankShot;
 	private boolean gameIsOver;
-	
+	private boolean givePoint;
+	private boolean lagChooser;
 
+
+/**
+ * @param lagWinner
+ * @param pointsToWin
+ */
 public ThreeCushion(PlayerPosition lagWinner, int pointsToWin)
 {
 	firstInning = 1;
@@ -97,7 +105,12 @@ public ThreeCushion(PlayerPosition lagWinner, int pointsToWin)
 	
 }
 
-public void lagWinnerChooses​(boolean selfBreak, BallType cueBall)
+
+/**
+ * @param selfBreak
+ * @param cueBall
+ */
+public void lagWinnerChooses(boolean selfBreak, BallType cueBall)
 {
 	shotBreak = true;
 	
@@ -122,16 +135,8 @@ public void lagWinnerChooses​(boolean selfBreak, BallType cueBall)
 	}
 	
 	//
-	
-	if(winnerOfLag == PLAYER_A)
-	{
-		ballColor = cueBall;
-		
-	}
-	else if(winnerOfLag == PLAYER_B)
-	{
-		ballColor = cueBall;
-	}
+
+	ballColor = cueBall;
 	
 	//
 	
@@ -143,27 +148,59 @@ public void lagWinnerChooses​(boolean selfBreak, BallType cueBall)
 	{
 		ballColor = WHITE;
 	}	
+	
+	lagChooser = true;
 }
 
-public void cueStickStrike​(BallType ball)
-{
-	IsInningStart = true;
-	isShotStart = true;
 	
+
+
+/**
+ * @param ball
+ */
+public void cueStickStrike(BallType ball)
+{
 	if(ball != ballColor)
 	{
 		foul();
+		return;
+	}
+	IsInningStart = true;
+	isShotStart = true;
+	
+
+	if(gameIsOver == true) {
+	IsInningStart = false;	
+	isShotStart = false;
 	}
 		
 	cushionHits = 0;
+	givePoint = false;
 	isPossiblyBankShot = false;
 	typeBankShot = false;
 	isRedHit = false;
 	isOtherBallHit = false;
+	
+	
 }
 
-public void cueBallStrike​(BallType ball)
+
+/**
+ * @param ball
+ */
+public void cueBallStrike(BallType ball)
 {
+	if(IsInningStart == false)
+	{
+		return;
+	}
+	
+	if(shotBreak == true && isRedHit == false && ball != RED)
+	{
+		foul();
+		return;
+	}
+	
 	if(isShotStart == false)
 	{
 		return;
@@ -184,6 +221,10 @@ public void cueBallStrike​(BallType ball)
 		isOtherBallHit = true;
 	}
 	
+	if(isRedHit && isOtherBallHit && cushionHits >= 3) {
+		givePoint = true;
+	}
+	
 	
 		
 	
@@ -192,8 +233,16 @@ public void cueBallStrike​(BallType ball)
 
 }
 
+/**
+ * 
+ */
 public void cueBallImpactCushion()
 {
+	if(IsInningStart == true && shotBreak == true && isRedHit == false)
+	{
+		foul();
+		return;
+	}
 	cushionHits += 1;
 	
 	if(isRedHit == false && isOtherBallHit == false && cushionHits == 3)
@@ -202,6 +251,9 @@ public void cueBallImpactCushion()
 	}
 }
 
+/**
+ * 
+ */
 public void endShot()
 {
 	if(IsInningStart == false)
@@ -209,9 +261,9 @@ public void endShot()
 		return;
 	}
 	
+	shotBreak = false;
 	
-	
-	if(isRedHit == true && isOtherBallHit == true && cushionHits >= 3 )
+	if(isRedHit == true && isOtherBallHit == true && givePoint)
 	{
 		
 		if(isPossiblyBankShot == true)
@@ -228,7 +280,7 @@ public void endShot()
 		{
 			this.playerAScore += 1;
 			
-			if(this.playerAScore == 3)
+			if(this.playerAScore == pointsWinGame)
 			{
 				gameIsOver = true;
 			}
@@ -237,7 +289,7 @@ public void endShot()
 		{
 			this.playerBScore += 1;
 			
-			if(this.playerBScore == 3)
+			if(this.playerBScore == pointsWinGame)
 			{
 				gameIsOver = true;
 			}
@@ -250,7 +302,7 @@ public void endShot()
 	
 	firstInning += 1;
 	isShotStart = false;
-	shotBreak = false;
+	
 	IsInningStart = false;
 	
 	if(ballColor == WHITE)
@@ -275,8 +327,17 @@ public void endShot()
 	
 }
 
+/**
+ * 
+ */
 public void foul()
 {
+	
+	if(lagChooser == false)
+	{
+		return;
+	}
+
 	IsInningStart = false;
 	firstInning += 1;
 	
@@ -289,6 +350,7 @@ public void foul()
 		ballColor = WHITE;
 	}
 	
+	
 	//
 	
 	if(currentPlayer == PLAYER_A)
@@ -299,58 +361,96 @@ public void foul()
 	{
 		currentPlayer = PLAYER_A;
 	}
+	if (gameIsOver == true) {
+		firstInning = 1;
+	}
+	
+	
+	
+	
 	
 	
 }
 
+/**
+ * @return
+ */
 public int getPlayerAScore()
 {
 	return this.playerAScore;
 }
 
+/**
+ * @return
+ */
 public int getPlayerBScore()
 {
 	return this.playerBScore;
 }
 
+/**
+ * @return
+ */
 public int getInning()
 {
 	return firstInning;
 }
 
+/**
+ * @return
+ */
 public BallType getCueBall()
 {
 	return ballColor;
 }
 
+/**
+ * @return
+ */
 public PlayerPosition getInningPlayer()
 {
 	return currentPlayer;
 }
 
+/**
+ * @return
+ */
 public boolean isBreakShot()
 {
 	return shotBreak;
 }
 
+/**
+ * @return
+ */
 public boolean isBankShot()
 {
 	return typeBankShot;
 }
 
+/**
+ * @return
+ */
 public boolean isShotStarted()
 {
 	return isShotStart;
 }
 
+/**
+ * @return
+ */
 public boolean isInningStarted()
 {
 	return IsInningStart;
 }
 
+/**
+ * @return
+ */
 public boolean isGameOver()
 {
 	return gameIsOver;
 }
 
 }
+
